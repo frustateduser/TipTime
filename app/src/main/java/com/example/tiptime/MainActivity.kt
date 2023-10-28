@@ -4,6 +4,7 @@ import android.icu.text.NumberFormat
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.annotation.VisibleForTesting
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -64,8 +65,12 @@ fun EditNumberField(
     )
 }
 
-private fun calculateTip(amount: Double, tipPercent: Double = 15.0): String {
-    val tip = tipPercent / 100 * amount
+@VisibleForTesting
+internal fun calculateTip(amount: Double, tipPercent: Double = 20.0, roundUp: Boolean): String {
+    var tip = tipPercent / 100 * amount
+    if (roundUp) {
+        tip = kotlin.math.ceil(tip)
+    }
     return NumberFormat.getCurrencyInstance().format(tip)
 }
 
@@ -74,7 +79,7 @@ private fun calculateTip(amount: Double, tipPercent: Double = 15.0): String {
 fun TipTimeLayout() {
     var amountInput by remember {mutableStateOf("")}
     val amount = amountInput.toDoubleOrNull()?:0.0
-    val tip = calculateTip(amount)
+    val tip = calculateTip(amount, roundUp = true)
     Column(
         modifier = Modifier
             .statusBarsPadding()
